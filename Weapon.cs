@@ -7,7 +7,7 @@
         public void Fire(Player player)
         {
             player.Health -= Damage;
-            Bullets -= 1;
+            Bullets -= 1; 
         }
     }
 
