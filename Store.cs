@@ -16,10 +16,10 @@ class Good
     }
 }
 
-class Cell
+class Cell : IReadOnlyCell
 {
     public Good Good { get; private set; }
-    public int Count { get; private set; }
+    public int Count { get; set; }
 
     public Cell(Good good, int count)
     {
@@ -28,87 +28,116 @@ class Cell
 
         Good = good;
         Count = count;
-    }
+    }  
+}
 
-    public void DecrementCount
+interface IReadOnlyCell
+{
+    public Good Good { get; }
+
+    public int Count { get; }
 }
 
 class Warehouse
 {
-    public List<Cell> Cells;
+    private readonly List<Cell> _cells;    
 
     public Warehouse()
     {
-        Cells = new List<Cell>();        
+        _cells = new List<Cell>();        
     }
+
+    public IReadOnlyList<IReadOnlyCell> Cells => _cells;    
 
     private List<Cell> GetRequiredGoods(Good good, int count)
     {
-        List<Cells> searchResults = Cells.FindAll(cell => cell.Good == good && cell.Count >= count);
-      
+        List<Cell> searchResults = _cells.FindAll(cell => cell.Good == good && cell.Count >= count);
+
+        return searchResults;        
     }
 
-    private bool IsGoodInStock(Good good, int count)
+    private void RemoveRequiredGoods (Good good, int count)
     {
-        if (Cells.Exists(cell => cell.Good == good && cell.Count >= count))        
-            return true;        
-        else        
-            return false;        
-    }
-
-    private void RemoveGoods (Good good, int count)
-    {
-        if (IsGoodInStock(good,count))
+        if (GetRequiredGoods(good, count) != null)
         {
-            int cellIndex = Cells.IndexOf(good.Name);
-            Cells[cellIndex].Count = -count;            
+            int cellIndex = _cells.IndexOf(good.Name);
+            _cells[cellIndex].Count = -count;            
         }        
     }
 
-    public void Deliver(Good good, int count)
+    public List<Cell> Deliver(Good good, int count)
     {
-        if (IsGoodInStock(good,count))
-        {
+        List<Cell> cellsToDeliver = new List<Cell>();
+        cellsToDeliver = GetRequiredGoods(good, count);
 
+        if (cellsToDeliver != null)
+        {
+            RemoveRequiredGoods(good, int);
+            return cellsToDeliver;
         }
         else
         {
-            Console.Write("Required good is out of stock");
+            return null;
+        }                
+    }
+
+    public void ShowAllGoods()
+    {
+        Console.WriteLine("Список товаров на складе: ");
+
+        foreach (var item in _cells)
+        {
+            Console.WriteLine("Название товара: " + item.Good.Name());
+            Console.WriteLine("количество: " + item.Count());
         }
     }
 }
 
 class Shop
 {
-    public List<Warehouse> Warehouses;
+    private readonly List<Warehouse> _warehouses;
 
     public Shop(Warehouse warehouse)
     {
         Warehouses = new List<Warehouse>();
     }
+
+    public IReadOnlyList<Warehouse> Warehouses => _warehouses;
 }
 
 class Cart
 {
+    private readonly List<Cell> _cells;
     private Shop _shop;
-    private Good _good;
-    private int _count;
 
     public Cart(Shop shop)
     {
         _shop = shop;
-        _good = null;
-        _count = 0;
+        _cells = new List<Cell>();
     }
 
     public void Add(Good good, int count)
     {
+        if (true)
+        {
 
+        }
     }
 
     public void Order()
     {
 
+    }
+
+    public void ShowAllGoods()
+    {
+        Console.WriteLine("Список товаров в корзине: ");
+
+        foreach (var cell in _cells)
+        {
+            Console.WriteLine("Название товара: " + cell.Good.Name());
+            Console.WriteLine("количество: " + cell.Count());
+        }
     }
 
 }
